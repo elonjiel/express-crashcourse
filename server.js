@@ -1,11 +1,20 @@
 import express from "express";
 import path from "path";
+import { fileURLToPath } from "url";
 import posts from "./routes/posts.js"
+import logger from "./middleware/logger.js"
+import error from "./middleware/error.js"
+import errorHandler from "./middleware/error.js";
+import notFound from "./middleware/notFound.js";
 
 // const express = require("express");
 // const path = require("path");
 // const posts = require("./routes/posts");
 const port = process.env.PORT || 8000;
+
+// Get the directory name
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -13,13 +22,20 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-
-// Routes
-
-app.use("/api/posts", posts);
+// Logger middleware
+app.use(logger);
 
 // setup static folder
-// app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public")));
+
+// Routes
+app.use("/api/posts", posts);
+
+
+// Error Handler
+app.use(notFound);
+app.use(errorHandler);
+
 
 // let posts = [
 //     {id: 1, title: "Post One"},
